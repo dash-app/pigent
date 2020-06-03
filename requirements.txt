@@ -1,0 +1,5 @@
+altgraph==0.17
+pigpio==1.46
+PyInstaller==3.6
+smbus2==0.3.0
+tornado==6.0.4
