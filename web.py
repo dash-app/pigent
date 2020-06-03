@@ -27,8 +27,8 @@ class IRHandler(tornado.web.RequestHandler):
             self.write({"status": "success"})
         except json.decoder.JSONDecodeError as ex:
             raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
-        #except RuntimeError as ex:
-        #    raise tornado.web.HTTPError(status_code=500, reason=str(ex))
+        except RuntimeError as ex:
+            raise tornado.web.HTTPError(status_code=500, reason=str(ex))
 
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
