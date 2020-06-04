@@ -5,6 +5,7 @@ import logging
 import tornado.ioloop
 import tornado.web
 from util import ir
+from sensors import bme
 
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
@@ -33,9 +34,28 @@ class IRHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
+# /api/v1/sensors
+class SensorsHandler(tornado.web.RequestHandler):
+    def initialize(self, config, sensors):
+        self.config = config
+        self.sensors = sensors
+
+    def get(self):
+        try:
+            r = self.sensors.get()
+            self.write(r)
+        except RuntimeError as ex:
+            raise tornado.web.HTTPError(status_code=500, reason=str(ex))
+
+    def write_error(self, status_code, exc_info=None, **kwargs):
+        self.finish({"error": self._reason})
+
 def start(config):
+    sensors = bme.BME280(config.bme280_address)
+
     web = tornado.web.Application([
-        (r"/api/v1/ir", IRHandler, dict(config=config))
+        (r"/api/v1/ir", IRHandler, dict(config=config)),
+        (r"/api/v1/sensors", SensorsHandler, dict(config=config, sensors=sensors))
     ], default_handler_class=DefaultHandler)
 
     web.listen(config.http_port)
