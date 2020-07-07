@@ -1,5 +1,7 @@
 altgraph==0.17
+macholib==1.14
 pigpio==1.46
 PyInstaller==3.6
+RPi.bme280==0.2.3
 smbus2==0.3.0
 tornado==6.0.4
