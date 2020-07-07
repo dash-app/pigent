@@ -41,25 +41,21 @@ class SensorsHandler(tornado.web.RequestHandler):
         self.sensors = sensors
 
     def get(self):
-        if self.sensors is None:
-            raise tornado.web.HTTPError(status_code=500, reason=str("sensors not initialized"))
+        if self.config.debug is not None:
+            self.write(self.sensors.example())
+            return
 
         try:
             r = self.sensors.get()
             self.write(r)
         except RuntimeError as ex:
             raise tornado.web.HTTPError(status_code=500, reason=str(ex))
-
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
 def start(config):
     try:
-        sensors = bme.BME280(config.bme280_address)
-    except RuntimeError as ex:
-        logging.error("BME280 initialize error: %s", str(ex))
-        sensors = None
-    finally:
+        sensors = bme.BME280(config.bme280_address, config.debug)
         web = tornado.web.Application([
             (r"/api/v1/ir", IRHandler, dict(config=config)),
             (r"/api/v1/sensors", SensorsHandler, dict(config=config, sensors=sensors))
@@ -69,4 +65,6 @@ def start(config):
         logging.info("HTTP Server started on %d", int(config.http_port))
 
         tornado.ioloop.IOLoop.current().start()
-
+    except RuntimeError as ex:
+        logging.error("Initialize error: %s", str(ex))
+        raise ex
