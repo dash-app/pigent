@@ -8,7 +8,7 @@ class BME280():
     def __init__(self, address, debug):
         port = 1
         if debug is None:
-            if not os.path.isfile("/dev/i2c-{0}".format(port)):
+            if not os.path.exists("/dev/i2c-{0}".format(port)):
                 raise RuntimeError('failed detect i2c device')
         else:
             return
