@@ -61,10 +61,12 @@ def start(config):
             (r"/api/v1/sensors", SensorsHandler, dict(config=config, sensors=sensors))
         ], default_handler_class=DefaultHandler)
 
-        web.listen(config.http_port)
+        # Enable no_keep_alive (Causes of 'Too many open files' Problem)
+        server = tornado.httpserver.HTTPServer(web, no_keep_alive=True)
+        server.listen(config.http_port)
         logging.info("HTTP Server started on %d", int(config.http_port))
 
-        tornado.ioloop.IOLoop.current().start()
+        tornado.ioloop.IOLoop.instance().start()
     except RuntimeError as ex:
         logging.error("Initialize error: %s", str(ex))
         raise ex
