@@ -62,7 +62,7 @@ def start(config):
         ], default_handler_class=DefaultHandler)
 
         # Enable no_keep_alive (Causes of 'Too many open files' Problem)
-        server = tornado.httpserver.HTTPServer(web, no_keep_alive=True)
+        server = tornado.httpserver.HTTPServer(web)
         server.listen(config.http_port)
         logging.info("HTTP Server started on %d", int(config.http_port))
 
