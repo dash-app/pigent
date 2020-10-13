@@ -23,7 +23,9 @@ class IRHandler(tornado.web.RequestHandler):
         try:
             req = tornado.escape.json_decode(self.request.body)
             signal = req['code']
-            ir.send(self.config.ir_gpio, signal)
+
+            if self.config.debug is None:
+                ir.send(self.config.ir_gpio, signal)
 
             self.write({"status": "success"})
         except json.decoder.JSONDecodeError as ex:
