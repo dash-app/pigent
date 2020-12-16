@@ -6,7 +6,7 @@ import tornado.ioloop
 import tornado.web
 from util import ir
 from sensors import bme
-from switchbot import switchbot
+#from switchbot import switchbot
 
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
@@ -57,17 +57,17 @@ class SensorsHandler(tornado.web.RequestHandler):
         self.finish({"error": self._reason})
 
 # /api/v1/switchbot
-class SwitchBotHandler(tornado.web.RequestHandler):
-    def post(self):
-        try:
-            req = tornado.escape.json_decode(self.request.body)
-            mac = req['mac']
-            cmd = req['command']
-            switchbot.run(mac, cmd)
-        except json.decoder.JSONDecodeError as ex:
-            raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
-        except RuntimeError as ex:
-            raise tornado.web.HTTPError(status_code=500, reason=str(ex))
+#class SwitchBotHandler(tornado.web.RequestHandler):
+#    def post(self):
+#        try:
+#            req = tornado.escape.json_decode(self.request.body)
+#            mac = req['mac']
+#            cmd = req['command']
+#            switchbot.run(mac, cmd)
+#        except json.decoder.JSONDecodeError as ex:
+#            raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
+#        except RuntimeError as ex:
+#            raise tornado.web.HTTPError(status_code=500, reason=str(ex))
 
 def start(config):
     try:
@@ -75,7 +75,7 @@ def start(config):
         web = tornado.web.Application([
             (r"/api/v1/ir", IRHandler, dict(config=config)),
             (r"/api/v1/sensors", SensorsHandler, dict(config=config, sensors=sensors)),
-            (r"/api/v1/switchbot", SwitchBotHandler, dict())
+            #(r"/api/v1/switchbot", SwitchBotHandler, dict())
         ], default_handler_class=DefaultHandler)
 
         # Enable no_keep_alive (Causes of 'Too many open files' Problem)
