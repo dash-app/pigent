@@ -8,7 +8,7 @@ import web
 import traceback
 
 # Logging
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.INFO if not config.debug else logging.DEBUG
 logging.basicConfig(
         format='[%(asctime)s] [%(levelname)s] %(message)s',
         datefmt='%Y/%m/%d %H:%M:%S %z',
@@ -20,7 +20,6 @@ if config.debug:
     logging.warning("WARNING: DEBUG MODE IS ENABLED")
     logging.warning("WARNING: SOME APIs(ex. sensors) WILL BE RESPOND AS DUMMY!!!")
     logging.warning("==============================")
-    LOG_LEVEL = logging.DEBUG
 
 logging.info("Starting Pigent...")
 
