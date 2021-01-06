@@ -4,7 +4,7 @@ import json
 import logging
 import tornado.ioloop
 import tornado.web
-from util import ir
+from util import ir, aeha
 from sensors import bme
 #from switchbot import switchbot
 
@@ -27,7 +27,16 @@ class IRHandler(tornado.web.RequestHandler):
 
             if self.config.debug is None:
                 ir.send(self.config.ir_gpio, signal)
-
+            else:
+                arr = [signal[i:i+2] for i in range(0, len(signal), 2)]
+                s = aeha.format(arr)
+                fmt = ""
+                for i in range(0, len(s)):
+                    fmt += "{ "
+                    for j in range(0, len(s[i])):
+                        fmt += "0x{:02X} ".format(s[i][j])
+                    fmt += "}\n"
+                logging.debug("Received IR Code: \n" + fmt)
             self.write({"status": "success"})
         except json.decoder.JSONDecodeError as ex:
             raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
