@@ -4,6 +4,8 @@ import json
 import logging
 import tornado.ioloop
 import tornado.web
+import time
+import asyncio
 from util import ir, aeha
 from sensors import bme
 #from switchbot import switchbot
@@ -15,29 +17,46 @@ class DefaultHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
+
+
 # /api/v1/ir
 class IRHandler(tornado.web.RequestHandler):
     def initialize(self, config):
         self.config = config
 
-    def post(self):
+    async def post(self):
         try:
             req = tornado.escape.json_decode(self.request.body)
-            signal = req['code']
 
-            if self.config.debug is None:
-                ir.send(self.config.ir_gpio, signal)
-            else:
-                arr = [signal[i:i+2] for i in range(0, len(signal), 2)]
-                s = aeha.format(arr)
-                fmt = ""
-                for i in range(0, len(s)):
-                    fmt += "{ "
-                    for j in range(0, len(s[i])):
-                        fmt += "0x{:02X} ".format(s[i][j])
-                    fmt += "}\n"
-                logging.debug("Received IR Code: \n" + fmt)
-            self.write({"status": "success"})
+            for signal in req:
+    
+            #    print(signal['signal'])
+            #    if 'interval' in signal:
+            #        print(signal['interval'])
+
+            #self.write({"status": "success"})
+            #return
+                #intervalが存在したらそれだけ遅らす
+                if 'interval' in signal:
+                    print(signal['interval'])
+                    await asyncio.sleep(signal['interval']/1000)#500ms->0.5s
+                else:
+                    print("no")
+                if self.config.debug is None:
+                    ir.send(self.config.ir_gpio, signal)
+                else:
+                    arr = [signal['signal'][i:i+2] for i in range(0, len(signal['signal']), 2)]
+                    s = aeha.format(arr)
+                    fmt = ""
+                    for i in range(0, len(s)):
+                        fmt += "{ "
+                        for j in range(0, len(s[i])):
+                            fmt += "0x{:02X} ".format(s[i][j])
+                        fmt += "}\n"
+                    logging.debug("Received IR Code: \n" + fmt)
+                self.write({"status": "success"})
+
+
         except json.decoder.JSONDecodeError as ex:
             raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
         except RuntimeError as ex:
