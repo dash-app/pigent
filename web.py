@@ -29,7 +29,7 @@ class IRHandler(tornado.web.RequestHandler):
                     # Convert to seconds
                     await asyncio.sleep(signal['interval']/1000)
                 if self.config.debug is None:
-                    ir.send(self.config.ir_gpio, signal)
+                    ir.send(self.config.ir_gpio, signal['signal'])
                 else:
                     arr = [signal['signal'][i:i+2] for i in range(0, len(signal['signal']), 2)]
                     s = aeha.format(arr)
