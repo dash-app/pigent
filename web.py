@@ -4,7 +4,6 @@ import json
 import logging
 import tornado.ioloop
 import tornado.web
-import time
 import asyncio
 from util import ir, aeha
 from sensors import bme
@@ -17,8 +16,6 @@ class DefaultHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
-
-
 # /api/v1/ir
 class IRHandler(tornado.web.RequestHandler):
     def initialize(self, config):
@@ -27,21 +24,10 @@ class IRHandler(tornado.web.RequestHandler):
     async def post(self):
         try:
             req = tornado.escape.json_decode(self.request.body)
-
             for signal in req:
-    
-            #    print(signal['signal'])
-            #    if 'interval' in signal:
-            #        print(signal['interval'])
-
-            #self.write({"status": "success"})
-            #return
-                #intervalが存在したらそれだけ遅らす
                 if 'interval' in signal:
-                    print(signal['interval'])
-                    await asyncio.sleep(signal['interval']/1000)#500ms->0.5s
-                else:
-                    print("no")
+                    # Convert to seconds
+                    await asyncio.sleep(signal['interval']/1000)
                 if self.config.debug is None:
                     ir.send(self.config.ir_gpio, signal)
                 else:
@@ -55,8 +41,6 @@ class IRHandler(tornado.web.RequestHandler):
                         fmt += "}\n"
                     logging.debug("Received IR Code: \n" + fmt)
                 self.write({"status": "success"})
-
-
         except json.decoder.JSONDecodeError as ex:
             raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
         except RuntimeError as ex:
