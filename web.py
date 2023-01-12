@@ -7,7 +7,8 @@ import tornado.web
 import asyncio
 from util import ir, aeha
 from sensors import bme
-#from switchbot import switchbot
+# from switchbot import switchbot
+
 
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
@@ -16,8 +17,12 @@ class DefaultHandler(tornado.web.RequestHandler):
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
-# /api/v1/ir
+
 class IRHandler(tornado.web.RequestHandler):
+    """
+    /api/v1/ir
+    """
+
     def initialize(self, config):
         self.config = config
 
@@ -31,7 +36,8 @@ class IRHandler(tornado.web.RequestHandler):
                 if self.config.debug is None:
                     ir.send(self.config.ir_gpio, signal['signal'])
                 else:
-                    arr = [signal['signal'][i:i+2] for i in range(0, len(signal['signal']), 2)]
+                    arr = [signal['signal'][i:i+2]
+                           for i in range(0, len(signal['signal']), 2)]
                     s = aeha.format(arr)
                     fmt = ""
                     for i in range(0, len(s)):
@@ -42,15 +48,20 @@ class IRHandler(tornado.web.RequestHandler):
                     logging.debug("Received IR Code: \n" + fmt)
                 self.write({"status": "success"})
         except json.decoder.JSONDecodeError as ex:
-            raise tornado.web.HTTPError(status_code=400, reason="failed decode json")
+            raise tornado.web.HTTPError(
+                status_code=400, reason="failed decode json")
         except RuntimeError as ex:
             raise tornado.web.HTTPError(status_code=500, reason=str(ex))
 
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
-# /api/v1/sensors
+
 class SensorsHandler(tornado.web.RequestHandler):
+    """
+    /api/v1/sensors
+    """
+
     def initialize(self, config, sensors):
         self.config = config
         self.sensors = sensors
@@ -65,11 +76,12 @@ class SensorsHandler(tornado.web.RequestHandler):
             self.write(r)
         except RuntimeError as ex:
             raise tornado.web.HTTPError(status_code=500, reason=str(ex))
+
     def write_error(self, status_code, exc_info=None, **kwargs):
         self.finish({"error": self._reason})
 
 # /api/v1/switchbot
-#class SwitchBotHandler(tornado.web.RequestHandler):
+# class SwitchBotHandler(tornado.web.RequestHandler):
 #    def post(self):
 #        try:
 #            req = tornado.escape.json_decode(self.request.body)
@@ -81,13 +93,15 @@ class SensorsHandler(tornado.web.RequestHandler):
 #        except RuntimeError as ex:
 #            raise tornado.web.HTTPError(status_code=500, reason=str(ex))
 
+
 def start(config):
     try:
         sensors = bme.BME280(config.bme280_address, config.debug)
         web = tornado.web.Application([
             (r"/api/v1/ir", IRHandler, dict(config=config)),
-            (r"/api/v1/sensors", SensorsHandler, dict(config=config, sensors=sensors)),
-            #(r"/api/v1/switchbot", SwitchBotHandler, dict())
+            (r"/api/v1/sensors", SensorsHandler,
+             dict(config=config, sensors=sensors)),
+            # (r"/api/v1/switchbot", SwitchBotHandler, dict())
         ], default_handler_class=DefaultHandler)
 
         # Enable no_keep_alive (Causes of 'Too many open files' Problem)

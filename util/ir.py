@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
-import logging
-import os
 import time
 import pigpio
 import collections
+
 
 def send(gpio: int, signal: []) -> None:
     """ Send IR Signal """
@@ -61,6 +60,7 @@ def send(gpio: int, signal: []) -> None:
     pi.stop()
     return
 
+
 def carrier(gpio, frequency, micros) -> []:
     wf = []
     cycle = 1000.0 / frequency
@@ -75,6 +75,7 @@ def carrier(gpio, frequency, micros) -> []:
         wf.append(pigpio.pulse(1 << gpio, 0, on))
         wf.append(pigpio.pulse(0, 1 << gpio, off))
     return wf
+
 
 def compress_wave(code):
     MAX_ENTRY = 600
@@ -106,7 +107,8 @@ def compress_wave(code):
                         break
 
     # select compressable blocks
-    blocks = [(start, size, count) for (start, size), count in dic.items() if count > 1 and size * count > 6]
+    blocks = [(start, size, count) for (start, size),
+              count in dic.items() if count > 1 and size * count > 6]
 
     if len(blocks) == 0:
         return code
@@ -136,6 +138,7 @@ def compress_wave(code):
     # then compressing blocks
     for start, size, count in sorted([blocks[i] for i in cands], key=lambda b: b[0], reverse=True):
         div, mod = count // 256, count % 256
-        code[start:start+size*count] = [255, 0] + code[start:start+size] + [255, 1, mod, div]
+        code[start:start+size*count] = [255, 0] + \
+            code[start:start+size] + [255, 1, mod, div]
 
     return code
