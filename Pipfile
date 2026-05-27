@@ -7,7 +7,6 @@ verify_ssl = true
 
 [packages]
 rpi-bme280 = "*"
-pigpio = "*"
 pyinstaller = "*"
 tornado = "*"
 
