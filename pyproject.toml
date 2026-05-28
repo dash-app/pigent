@@ -6,6 +6,7 @@ authors = ["SYNCHTHIA <support@synchthia.net>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+pigpio = "^1.78"
 rpi-bme280 = "^0.2.4"
 smbus2 = "^0.4.2"
 tornado = "^6.2"
